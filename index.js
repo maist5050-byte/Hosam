@@ -4,39 +4,31 @@ const server = http.createServer((req, res) => {
   res.setHeader('Content-Type', 'application/json');
   res.setHeader('Access-Control-Allow-Origin', '*');
 
-  const hosamUnboundV7 = {
-    // --- 🎯 هجوم كاسر للقيود (Ultimate Aim) ---
-    "y4": 2.10,               // سحب عمودي خارق (هيدشوت من أول لمسة)
-    "x4": 1.45,               // ثبات أفقي كلي (لحاق الرأس يمين وشمال)
-    "aim_lock": 5.0,          // قفل إيم حديدي (مستحيل يفلت من الخصم)
-    "headshot_rate": 999,     // كسر حاجز الـ 100% لضمان اللون الأحمر
-    "auto_stop": true,        // فرامل ذكية عند منطقة الرأس
-    "magnet_head": 1,         // جذب فيزيائي للطلقات نحو الجمجمة
-    "limit_y_axis": 0.45,     // تثبيت الإيم على الرأس ومنع الطيران للسماء
+  const hosamGhostV11 = {
+    // --- 🛡️ درع الرأس المشفت (Head Tilt/Shift) ---
+    "head_hitbox_shift_x": 0.35,      // إزاحة الرأس لليمين أو اليسار برمجياً
+    "head_hitbox_logic": "dynamic",  // جعل الإزاحة متغيرة عشان الخصم ما يحفظ مكانها
+    "anti_head_lock": 1,             // كسر قفل الإيم التلقائي للخصم على راسك
+    "hitbox_sync_bypass": true,      // تزوير إحداثياتك الحقيقية للسيرفر
 
-    // --- 🔫 استقرار السلاح (No Recoil) ---
-    "recoil": -15,            // الرصاص بيمشي في خط مستقيم 100%
-    "fire_rate_sync": 1,      
-    "hit_delay": 0,           // تسجيل الضرر في نفس جزء الثانية
+    // --- 🎯 محرك الهيدشوت (الجلد تبعك) ---
+    "y_axis_acceleration": 2.3,      // سحب هيدشوت سريع ومستقر
+    "aim_lock_force": 1.1,           // قفل مغناطيسي قوي
+    "recoil_stabilizer": 0.0001,     // ثبات السلاح (مسطرة)
+    "magnet_head_radius": 18,        // جذب طلقاتك لراس الخصم
 
-    // --- ❄️ ثلج فلاش (Instant Gloo) ---
-    "gloo_wall_speed": 0.0001, 
-    "gloo_anim_skip": 1,      
-    "fast_deploy": 1,
+    // --- ⚡ السرعة الخارقة (ثلج + لمس) ---
+    "gloo_wall_instant": 0,          // وضع الثلج بلمحة بصر
+    "touch_response_ms": 0.1,        // استجابة لمس فورية
+    "animation_skip": 1,             // تخطي حركات اللاعب البطيئة
 
-    // --- ⚡ استجابة ونت (بنج 50 ثابت) ---
-    "touch_response": 0.0001, 
-    "ping_stabilizer": 1,     
-    "packet_compensation": 1, 
-    "net_smooth": 1,
-
-    // --- 🛡️ حماية دفاعية (Anti-Head) ---
-    "anti_aim": 1,            
-    "head_size_reduce": 0.15, // تقليل مساحة الهيد عندك لأقل حد ممكن
-    "hit_resistance": 0.35    // مقاومة دمج الهيدشوت ضدك
+    // --- 📡 ثبات الراوتر والنت (50ms) ---
+    "ping_stabilizer": 1,            // منع "تنتيش" البنج
+    "packet_priority": "ultra",      // إعطاء بياناتك الأولوية القصوى
+    "net_jitter_fix": true           // إصلاح تقلبات إشارة الراوتر
   };
 
-  res.end(JSON.stringify(hosamUnboundV7));
+  res.end(JSON.stringify(hosamGhostV11));
 });
 
 server.listen(process.env.PORT || 3000);
