@@ -4,26 +4,27 @@ const server = http.createServer((req, res) => {
   res.setHeader('Content-Type', 'application/json');
   res.setHeader('Access-Control-Allow-Origin', '*');
 
-  // الكود الجامع لكل الإعدادات (هيدشوت + تثبيت بنج)
-  const hosamVIP = {
-    // --- إعدادات الهيدشوت والسحب ---
-    "y4": 1.45,           // سحب هيدشوت صاروخي
-    "x4": 0.95,           // ثبات كامل لليمين واليسار
-    "aim_lock": 0,        // إيم متحرك (أمان من الباند)
-    "headshot_rate": 85,  // نسبة هيدشوت 85%
-    "recoil": 0.02,       // ارتداد شبه معدوم
-    "damage": 1.70,       // دمج قوي وفعال
+  const hosamSmartLock = {
+    // --- إعدادات القفل الذكي (سواء سحبت بقوة أو بشويش) ---
+    "y4": 0.45,           // سحب هادئ ومتزن
+    "x4": 0.30,           // منع الاهتزاز يمين وشمال
+    "aim_lock": 1,        // تفعيل قفل الإيم على الخصم فوراً
+    "headshot_rate": 90,  // طلبك: الهيدشوت صار 90%
+    "recoil": 0.05,       // ارتداد منخفض جداً لزيادة الثبات
+    
+    // --- برمجة الثبات على الرأس (Sticky Aim) ---
+    "auto_stop": true,    // إيقاف الإيم أوتوماتيكياً عند منطقة الرأس
+    "magnet_head": 1,     // جذب الطلقة للرأس حتى لو السحبة كانت قوية
+    "smooth_drag": 0,     // إلغاء "النعومة" عشان القفل يكون سريع وقوي
+    "limit_y_axis": 0.40, // سقف للسحب عشان ما يطلع فوق الراس أبداً
 
-    // --- إعدادات تثبيت البنج (النت والراوتر) ---
-    "ping_stabilizer": 1,      // تثبيت البنج ومنع القفزات المفاجئة
-    "packet_compensation": 1,  // تعويض البيانات الضائعة من الراوتر
-    "network_sync": 1,         // مزامنة فورية مع سيرفر اللعبة
-    "buffer_control": 0,       // إلغاء التأخير (No Delay)
-    "fast_shot": true,         // تسريع خروج الطلقة من السلاح
-    "anti_lag": "enabled"      // تفعيل وضع تقليل اللاغ
+    // --- إعدادات ثبات النت والراوتر (البنج 50) ---
+    "ping_stabilizer": 1,      // تثبيت البنج وتجنب تقطيع الراوتر
+    "packet_compensation": 1,  // تعويض تقطيع النت
+    "network_priority": "true" 
   };
 
-  res.end(JSON.stringify(hosamVIP));
+  res.end(JSON.stringify(hosamSmartLock));
 });
 
 server.listen(process.env.PORT || 3000);
