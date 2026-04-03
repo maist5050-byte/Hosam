@@ -1,19 +1,15 @@
 const http = require('http');
-
 const server = http.createServer((req, res) => {
   res.setHeader('Content-Type', 'application/json');
   res.setHeader('Access-Control-Allow-Origin', '*');
-
-  const myVIPData = {
-    "y4": 0.95,
-    "x4": 0.95,
-    "aim_lock": 1,
-    "headshot_rate": 100,
-    "recoil": 0.0,
-    "damage": 5.0
+  const proData = {
+    "y4": 0.65,
+    "x4": 0.55,
+    "aim_lock": 0,
+    "headshot_rate": 75,
+    "recoil": 0.15,
+    "damage": 1.45
   };
-
-  res.end(JSON.stringify(myVIPData));
+  res.end(JSON.stringify(proData));
 });
-
 server.listen(process.env.PORT || 3000);
