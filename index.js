@@ -4,27 +4,35 @@ const server = http.createServer((req, res) => {
   res.setHeader('Content-Type', 'application/json');
   res.setHeader('Access-Control-Allow-Origin', '*');
 
-  const hosamSmartLock = {
-    // --- إعدادات القفل الذكي (سواء سحبت بقوة أو بشويش) ---
-    "y4": 0.45,           // سحب هادئ ومتزن
-    "x4": 0.30,           // منع الاهتزاز يمين وشمال
-    "aim_lock": 1,        // تفعيل قفل الإيم على الخصم فوراً
-    "headshot_rate": 90,  // طلبك: الهيدشوت صار 90%
-    "recoil": 0.05,       // ارتداد منخفض جداً لزيادة الثبات
-    
-    // --- برمجة الثبات على الرأس (Sticky Aim) ---
-    "auto_stop": true,    // إيقاف الإيم أوتوماتيكياً عند منطقة الرأس
-    "magnet_head": 1,     // جذب الطلقة للرأس حتى لو السحبة كانت قوية
-    "smooth_drag": 0,     // إلغاء "النعومة" عشان القفل يكون سريع وقوي
-    "limit_y_axis": 0.40, // سقف للسحب عشان ما يطلع فوق الراس أبداً
+  const hosamGodModeV3 = {
+    // --- 🎯 الهيدشوت الاحترافي (مسمار في الرأس) ---
+    "y4": 0.48,              
+    "x4": 0.35,              
+    "aim_lock": 1,           
+    "headshot_rate": 90,     
+    "auto_stop": true,       
+    "magnet_head": 1,        
+    "limit_y_axis": 0.38,    
 
-    // --- إعدادات ثبات النت والراوتر (البنج 50) ---
-    "ping_stabilizer": 1,      // تثبيت البنج وتجنب تقطيع الراوتر
-    "packet_compensation": 1,  // تعويض تقطيع النت
-    "network_priority": "true" 
+    // --- ❄️ سرعة الثلج (Instant Gloo Wall) ---
+    "gloo_wall_speed": 0.001, // وضع الثلج بأقل زمن استجابة ممكن
+    "auto_crouch_gloo": true, // مزامنة وضعية القرفصاء مع الثلج
+    "fast_deploy": 1,         // تفعيل النشر السريع للثلج
+
+    // --- ⚡ سرعة الاستجابة والنت (بنج 50) ---
+    "touch_response": 0.001,  // سرعة لمس خرافية
+    "hit_delay": 0,           
+    "fire_rate_sync": 1,      
+    "ping_stabilizer": 1,     // تثبيت بنج الراوتر
+    "packet_compensation": 1, // منع تقطيع النت
+
+    // --- 🛡️ الدرع الدفاعي (صعوبة جيبتك هيد) ---
+    "anti_aim": 1,           
+    "head_size_reduce": 0.40, 
+    "hit_resistance": 0.25   
   };
 
-  res.end(JSON.stringify(hosamSmartLock));
+  res.end(JSON.stringify(hosamGodModeV3));
 });
 
 server.listen(process.env.PORT || 3000);
