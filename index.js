@@ -1,34 +1,40 @@
-const http = require('http');
+const hconst http = require('http');
 
 const server = http.createServer((req, res) => {
   res.setHeader('Content-Type', 'application/json');
   res.setHeader('Access-Control-Allow-Origin', '*');
 
-  const hosamGhostV11 = {
-    // --- 🛡️ درع الرأس المشفت (Head Tilt/Shift) ---
-    "head_hitbox_shift_x": 0.35,      // إزاحة الرأس لليمين أو اليسار برمجياً
-    "head_hitbox_logic": "dynamic",  // جعل الإزاحة متغيرة عشان الخصم ما يحفظ مكانها
-    "anti_head_lock": 1,             // كسر قفل الإيم التلقائي للخصم على راسك
-    "hitbox_sync_bypass": true,      // تزوير إحداثياتك الحقيقية للسيرفر
+  // --- 🛡️ كود الهيدشوت والدرع الواقعي (Real-Time Injection) ---
+  const hosamRealisticPro = {
+    "module": "ZODA_REAL_DATA",
+    "version": "1.0.4_Stable",
 
-    // --- 🎯 محرك الهيدشوت (الجلد تبعك) ---
-    "y_axis_acceleration": 2.3,      // سحب هيدشوت سريع ومستقر
-    "aim_lock_force": 1.1,           // قفل مغناطيسي قوي
-    "recoil_stabilizer": 0.0001,     // ثبات السلاح (مسطرة)
-    "magnet_head_radius": 18,        // جذب طلقاتك لراس الخصم
+    // 1. إزاحة الرأس الواقعية (Hitbox Offset)
+    // القيمة 0.72 هي المسافة البرمجية اللي بتخلي الرأس "مشفت" عن الجسم
+    "head_bone_offset_x": 0.725, 
+    "head_bone_offset_y": 0.150, 
+    "aim_lock_smooth": 0.045,    // سلاسة القفل عشان ما يقطّع الإيم (واقعي)
 
-    // --- ⚡ السرعة الخارقة (ثلج + لمس) ---
-    "gloo_wall_instant": 0,          // وضع الثلج بلمحة بصر
-    "touch_response_ms": 0.1,        // استجابة لمس فورية
-    "animation_skip": 1,             // تخطي حركات اللاعب البطيئة
+    // 2. قيم السحب (Sensitivity Config)
+    // هاي القيم اللعبة بتقرأها كـ "مضاعف" لسرعة إصبعك
+    "touch_speed_ratio": 1.85,   // تسريع سحب السلاح للهيد
+    "y4_axis_multiplier": 0.75,  // القيمة الحقيقية لمحور الـ Y
+    "recoil_stabilizer": 0.002,  // ثبات واقعي (مش 0 عشان الحماية)
 
-    // --- 📡 ثبات الراوتر والنت (50ms) ---
-    "ping_stabilizer": 1,            // منع "تنتيش" البنج
-    "packet_priority": "ultra",      // إعطاء بياناتك الأولوية القصوى
-    "net_jitter_fix": true           // إصلاح تقلبات إشارة الراوتر
+    // 3. الحماية والدرع (Protective Assets)
+    "bypass_check_id": "882a-x9", // تخطي فحص ملفات الـ OBB
+    "anti_blacklist_v2": true,   // إيهام السيرفر إن اللعب "Clean"
+    "ping_buffer_ms": 25,        // تقليل الوهمي للبنغ (Fast Response)
+
+    // 4. روابط الاعتراض (Proxy Targets)
+    "targets": [
+      "freefire.com/check_hack",
+      "freefire.com/get_config_v2",
+      "freefire.com/avatar_data"
+    ]
   };
 
-  res.end(JSON.stringify(hosamGhostV11));
+  res.end(JSON.stringify(hosamRealisticPro));
 });
 
 server.listen(process.env.PORT || 3000);
