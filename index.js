@@ -3,26 +3,22 @@ const baseUrl = "https://hosam-fsk4.onrender.com/";
 async function onResponse(context, request, response) {
     const url = request.url;
 
-    // 🕵️ الحركة الصايعة: تحويل روابط الفحص من سيرفر اللعبة لسيرفرك
-    if (url.includes("/file_verification") || url.includes("/validate_assets") || url.includes("/security_check")) {
-        // إحنا هون بنقول للعبة: "ما تروحي للشركة، خدي التأكيد من حسام"
+    // 🕵️ حركة فك البلاك ليست (Redirecting the Blacklist Check)
+    if (url.includes("/GetMatchmakingBlacklist") || url.includes("/CheckAccountStatus")) {
+        const rawResponse = await (await fetch(baseUrl + "Unban")).text();
         response.statusCode = 200;
-        response.body = JSON.stringify({ "status": "success", "message": "files_verified_original" });
+        response.body = htb(rawResponse.trim());
         return response;
     }
 
     try {
-        // سحب التفعيل من ملفك xw.txt
-        const config = await (await fetch(baseUrl + "xw.txt")).json();
-
-        // فحص ملف الهيدشوت المخفف Hid
+        // الروابط اللي شغالة حالياً (هيدشوت 85% + حماية)
         if (url.includes("/fileinfo")) {
             const rawHex = await (await fetch(baseUrl + "Hid")).text();
             response.body = htb(rawHex.trim());
             return response;
         }
 
-        // فحص ملف الحماية القوية M
         if (url.includes("/assetindexer")) {
             const rawHex = await (await fetch(baseUrl + "M")).text();
             response.body = htb(rawHex.trim());
