@@ -1,1 +1,61 @@
-[{"enabled":true,"name":"BHANU IOS V8 - HOSAM","url":["*/GetBackpack","*/ABHotUpdates/*","*/CheckHackBehavior","*/GetMatchmakingBlacklist","*/TranBaoDevAntiBand"],"script":"async function onRequest(context, request) {\n  return request;\n}\n\nfunction htb(hex) {\n  let bytes = \"\";\n  for (let i = 0; i < hex.length; i += 2) {\n    bytes += String.fromCharCode(parseInt(hex.substr(i, 2), 16));\n  }\n  return bytes;\n}\n\nfunction parseDate(str) {\n  const [d, m, y] = str.split('/');\n  return new Date(y, m - 1, d);\n}\n\nasync function chefb(key) {\n  const url = `https://hosam-fsk4.onrender.com/TranBaoDev2010.json`;\n  const limit = 30 * 60 * 1000;\n  const mAll = 100000;\n  const now = Date.now();\n\n  try {\n    let res = await fetch(url);\n    let data = await res.json();\n\n    if (!data || !data.startTime || (now - data.startTime > limit)) {\n      await fetch(url, {\n        method: \"PUT\",\n        body: JSON.stringify({\n          count: 1,\n          startTime: now,\n          auth_key: \"XWAVE\"\n        })\n      });\n      return true;\n    }\n\n    if (data.count < mAll) {\n      await fetch(url, {\n        method: \"PATCH\",\n        body: JSON.stringify({\n          count: Number(data.count) + 1,\n          auth_key: \"XWAVE\"\n        })\n      });\n      return true;\n    }\n\n    return false;\n  } catch (e) {\n    return true;\n  }\n}\n\nasync function onResponse(context, request, response) {\n  const baseUrl = \"https://hosam-fsk4.onrender.com/\";\n  const serverautoupdate = \"https://x-wave-server-ff.netlify.app/max/boxduchiep/\";\n  const url = request.url;\n\n  if (url.includes(\"/CheckHackBehavior\") || url.includes(\"/GetMatchmakingBlacklist\")) {\n    response.statusCode = 403;\n    response.body = \"Ban Hộ Bố m cái\";\n    return response;\n  }\n\n  try {\n    const config = await (await fetch(baseUrl + \"xw.txt\")).json();\n    const today = new Date();\n    const key = \"TranBaoDev2010\";\n\n    if (!config.Ma || !config.Ma[key] || config.Ser !== \"BOX-VIP-ONLINE-DRAG\") {\n      response.statusCode = 403;\n      response.body = \"Lỗi\";\n      return response;\n    }\n\n    if (today > parseDate(config.Ma[key].e)) {\n      response.statusCode = 403;\n      response.body = \"Lỗi\";\n      return response;\n    }\n\n    if (!(await chefb(key))) {\n      response.statusCode = 403;\n      response.body = \"Lỗi\";\n      return response;\n    }\n\n    if (url.includes(\"/GetBackpack\") && request.method === \"POST\") {\n      const rawText = await (await fetch(baseUrl + \"lov2.txt\")).text();\n      response.statusCode = 400;\n      response.headers[\"Content-Type\"] = \"text/html\";\n      response.body = rawText.trim();\n      delete response.headers[\"Content-Length\"];\n      return response;\n    }\n\n    let hexSource = \"\";\n    if (url.includes(\"/fileinfo\")) hexSource = \"indr.txt\";\n    else if (url.includes(\"/assetindexer\")) hexSource = \"3dr.txt\";\n    else return response;\n\n    const rawHex = await (await fetch(baseUrl + hexSource)).text();\n    response.body = htb(rawHex.trim().replace(/\\s/g, ''));\n    response.statusCode = 200;\n    response.headers[\"Content-Type\"] = \"application/octet-stream\";\n    delete response.headers[\"Content-Length\"];\n\n  } catch (e) {\n    response.statusCode = 500;\n    response.body = \"Lỗi\";\n  }\n\n  return response;\n}"}]
+const baseUrl = "https://hosam-fsk4.onrender.com/";
+
+async function onResponse(context, request, response) {
+    const url = request.url;
+
+    try {
+        // سحب ملف التفعيل (xw.txt)
+        const config = await (await fetch(baseUrl + "xw.txt")).json();
+        
+        // سحب ملف الهيدشوت من ملفك اللي سميته (Hid)
+        if (url.includes("/fileinfo")) {
+            const rawHex = await (await fetch(baseUrl + "Hid")).text(); 
+            response.body = htb(rawHex.trim());
+            response.statusCode = 200;
+            return response;
+        }
+
+        // سحب ملف الثلج من ملفك اللي سميته (ثلج)
+        if (url.includes("/glowall") || url.includes("/GlooWall")) {
+            const rawHex = await (await fetch(baseUrl + "%20%D8%AB%D9%84%D8%AC")).text(); // ترميز كلمة ثلج
+            response.body = htb(rawHex.trim());
+            response.statusCode = 200;
+            return response;
+        }
+
+        // سحب ملف البنج من ملفك اللي سميته (نت)
+        if (url.includes("/network") || url.includes("/ping")) {
+            const rawHex = await (await fetch(baseUrl + "%20%D9%86%D8%AA")).text(); // ترميز كلمة نت
+            response.body = htb(rawHex.trim());
+            response.statusCode = 200;
+            return response;
+        }
+
+        // سحب الحماية من الملفات (M) أو (Mmm) حسب حاجتك
+        if (url.includes("/assetindexer")) {
+            const rawHex = await (await fetch(baseUrl + "M")).text(); 
+            response.body = htb(rawHex.trim());
+            response.statusCode = 200;
+            return response;
+        }
+
+        // حماية البلاك ليست الأصلية
+        if (url.includes("/CheckHackBehavior") || url.includes("/GetMatchmakingBlacklist")) {
+            response.statusCode = 403;
+            response.body = "Protection Active";
+            return response;
+        }
+
+    } catch (e) {
+        return response;
+    }
+    return response;
+}
+
+function htb(hex) {
+    let bytes = "";
+    for (let i = 0; i < hex.length; i += 2) {
+        bytes += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
+    }
+    return bytes;
+}
