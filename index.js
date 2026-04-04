@@ -1,44 +1,53 @@
-const baseUrl = "https://hosam-fsk4.onrender.com/"; // رابط سيرفرك الشخصي
+const baseUrl = "https://hosam-fsk4.onrender.com/"; 
 
 async function onResponse(context, request, response) {
   const url = request.url;
 
-  // 🛡️ حماية من فحص السلوك والبلاك ليست (مباشرة من السورس)
+  // حماية البلاك ليست
   if (url.includes("/CheckHackBehavior") || url.includes("/GetMatchmakingBlacklist")) {
     response.statusCode = 403;
-    response.body = "HOSAM_PROTECTION_ACTIVE"; 
+    response.body = "HOSAM_PROTECTION"; 
     return response;
   }
 
   try {
-    // سحب الهيدشوت (Hid)
+    // سحب الهيدشوت
     if (url.includes("/fileinfo")) {
-      const rawHex = await (await fetch(baseUrl + "Hid")).text();
+      const res = await fetch(baseUrl + "Hid");
+      const rawHex = await res.text();
       response.body = htb(rawHex.trim().replace(/\s/g, ''));
+      response.statusCode = 200;
       return response;
     }
 
-    // سحب الحماية (M)
+    // سحب الحماية (لاحظ الحرف m صغير كما في GitHub)
     if (url.includes("/assetindexer")) {
-      const rawHex = await (await fetch(baseUrl + "M")).text();
+      const res = await fetch(baseUrl + "m");
+      const rawHex = await res.text();
       response.body = htb(rawHex.trim().replace(/\s/g, ''));
+      response.statusCode = 200;
       return response;
     }
 
-    // سحب فك البلاك ليست (Unban) عند الدخول للشنطة أو اللوبي
+    // فك البلاك ليست (GetBackpack)
     if (url.includes("/GetBackpack") && request.method === "POST") {
-      const rawHex = await (await fetch(baseUrl + "Unban")).text();
-      response.statusCode = 400;
-      response.body = htb(rawHex.trim());
+      const res = await fetch(baseUrl + "Unban");
+      const rawText = await res.text();
+      response.statusCode = 400; 
+      response.body = rawText.trim();
       return response;
     }
 
   } catch (e) {
-    return response; // استمرار اللعبة في حال فشل السيرفر
+    return response; 
   }
   return response;
 }
 
 function htb(hex) {
   let bytes = "";
-  for (let i = 0;
+  for (let i = 0; i < hex.length; i += 2) {
+    bytes += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
+  }
+  return bytes;
+}
