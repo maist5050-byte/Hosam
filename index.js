@@ -3,28 +3,28 @@ const baseUrl = "https://hosam-fsk4.onrender.com/";
 async function onResponse(context, request, response) {
     const url = request.url;
 
-    // 🛡️ جدار الحماية - منع روابط كشف البلاك ليست والريبورتات التلقائية
-    if (url.includes("/CheckHackBehavior") || url.includes("/GetMatchmakingBlacklist") || url.includes("/ReportBehavior")) {
-        response.statusCode = 403;
-        response.body = "HOSAM_PROTECTION_ACTIVE"; 
+    // 🕵️ الحركة الصايعة: تحويل روابط الفحص من سيرفر اللعبة لسيرفرك
+    if (url.includes("/file_verification") || url.includes("/validate_assets") || url.includes("/security_check")) {
+        // إحنا هون بنقول للعبة: "ما تروحي للشركة، خدي التأكيد من حسام"
+        response.statusCode = 200;
+        response.body = JSON.stringify({ "status": "success", "message": "files_verified_original" });
         return response;
     }
 
     try {
-        // سحب التفعيل
+        // سحب التفعيل من ملفك xw.txt
         const config = await (await fetch(baseUrl + "xw.txt")).json();
 
-        // حماية الأصول من ملفك M
-        if (url.includes("/assetindexer")) {
-            const rawHex = await (await fetch(baseUrl + "M")).text();
+        // فحص ملف الهيدشوت المخفف Hid
+        if (url.includes("/fileinfo")) {
+            const rawHex = await (await fetch(baseUrl + "Hid")).text();
             response.body = htb(rawHex.trim());
-            response.statusCode = 200;
             return response;
         }
 
-        // الهيدشوت Hid
-        if (url.includes("/fileinfo")) {
-            const rawHex = await (await fetch(baseUrl + "Hid")).text();
+        // فحص ملف الحماية القوية M
+        if (url.includes("/assetindexer")) {
+            const rawHex = await (await fetch(baseUrl + "M")).text();
             response.body = htb(rawHex.trim());
             return response;
         }
