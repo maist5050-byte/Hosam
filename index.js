@@ -1,53 +1,24 @@
-const baseUrl = "https://hosam-fsk4.onrender.com/"; 
+const express = require('express');
+const axios = require('axios');
+const app = express();
 
-async function onResponse(context, request, response) {
-  const url = request.url;
+const githubUser = "maist5050-byte"; // اسم مستخدم GitHub الخاص بك
+const repo = "Hosam"; // اسم المستودع
 
-  // حماية البلاك ليست
-  if (url.includes("/CheckHackBehavior") || url.includes("/GetMatchmakingBlacklist")) {
-    response.statusCode = 403;
-    response.body = "HOSAM_PROTECTION"; 
-    return response;
-  }
-
-  try {
-    // سحب الهيدشوت
-    if (url.includes("/fileinfo")) {
-      const res = await fetch(baseUrl + "Hid");
-      const rawHex = await res.text();
-      response.body = htb(rawHex.trim().replace(/\s/g, ''));
-      response.statusCode = 200;
-      return response;
+app.get('/:file', async (req, res) => {
+    try {
+        const fileName = req.params.file;
+        // جلب الملف مباشرة من GitHub Raw
+        const url = `https://raw.githubusercontent.com/${githubUser}/${repo}/main/${fileName}`;
+        const response = await axios.get(url);
+        
+        res.send(response.data);
+    } catch (error) {
+        res.status(404).send("File Not Found");
     }
+});
 
-    // سحب الحماية (لاحظ الحرف m صغير كما في GitHub)
-    if (url.includes("/assetindexer")) {
-      const res = await fetch(baseUrl + "m");
-      const rawHex = await res.text();
-      response.body = htb(rawHex.trim().replace(/\s/g, ''));
-      response.statusCode = 200;
-      return response;
-    }
-
-    // فك البلاك ليست (GetBackpack)
-    if (url.includes("/GetBackpack") && request.method === "POST") {
-      const res = await fetch(baseUrl + "Unban");
-      const rawText = await res.text();
-      response.statusCode = 400; 
-      response.body = rawText.trim();
-      return response;
-    }
-
-  } catch (e) {
-    return response; 
-  }
-  return response;
-}
-
-function htb(hex) {
-  let bytes = "";
-  for (let i = 0; i < hex.length; i += 2) {
-    bytes += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
-  }
-  return bytes;
-}
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
+});
