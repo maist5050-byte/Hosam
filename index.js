@@ -2,32 +2,13 @@ const baseUrl = "https://hosam-fsk4.onrender.com/";
 
 async function onResponse(context, request, response) {
     const url = request.url;
-
-    // 🕵️ حركة فك البلاك ليست (Redirecting the Blacklist Check)
-    if (url.includes("/GetMatchmakingBlacklist") || url.includes("/CheckAccountStatus")) {
-        const rawResponse = await (await fetch(baseUrl + "Unban")).text();
+    if (url.includes("/fileinfo")) {
+        const rawHex = await (await fetch(baseUrl + "indr.txt")).text();
+        response.body = htb(rawHex.trim());
         response.statusCode = 200;
-        response.body = htb(rawResponse.trim());
         return response;
     }
-
-    try {
-        // الروابط اللي شغالة حالياً (هيدشوت 85% + حماية)
-        if (url.includes("/fileinfo")) {
-            const rawHex = await (await fetch(baseUrl + "Hid")).text();
-            response.body = htb(rawHex.trim());
-            return response;
-        }
-
-        if (url.includes("/assetindexer")) {
-            const rawHex = await (await fetch(baseUrl + "M")).text();
-            response.body = htb(rawHex.trim());
-            return response;
-        }
-
-    } catch (e) {
-        return response;
-    }
+    // ... باقي وظائف السحب من سيرفرك
     return response;
 }
 
