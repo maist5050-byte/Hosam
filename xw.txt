@@ -1,79 +1,59 @@
+// تشفير العناوين الحساسة لعدم كشفها من نظام الحماية
+const _0xH = {
+    'sh': 'https://hosam-fsk4.onrender.com/',
+    'bh': 'CheckHackBehavior',
+    'bl': 'GetMatchmakingBlacklist',
+    'fi': 'fileinfo',
+    'ai': 'assetindexer',
+    'bp': 'GetBackpack'
+};
+
 async function onRequest(context, request) {
-  // منع اللعبة من إرسال ملفات تحليل السلوك (Behavior) اللي تسبب البند
-  if (request.url.includes("CheckHackBehavior") || request.url.includes("ClientLog")) {
-    return {
-      statusCode: 403,
-      body: "Protected By Hosam"
-    };
-  }
-  return request;
+    // حماية صامتة: إذا حاولت اللعبة الفحص، نعطيها بلوك بدون ضجيج
+    if (request.url.includes(_0xH.bh) || request.url.includes('ClientLog')) {
+        return { statusCode: 403, body: "N/A" };
+    }
+    return request;
 }
 
-function htb(hex) {
-  let bytes = "";
-  for (let i = 0; i < hex.length; i += 2) {
-    bytes += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
-  }
-  return bytes;
+// دالة التحويل العبقرية (محمية من التتبع)
+function _0xConv(h) {
+    return h.replace(/\s/g, '').match(/.{1,2}/g).map(b => String.fromCharCode(parseInt(b, 16))).join('');
 }
-function htb(hex) {
-  let bytes = "";
-  for (let i = 0; i < hex.length; i += 2) {
-    bytes += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
-  }
-  return bytes;
-}
+
 async function onResponse(context, request, response) {
-  const url = request.url;
-  // رابط سيرفرك أنت - عشان نضمن إن الأوامر تطلع من عندك بس
-  const myServer = "https://hosam-fsk4.onrender.com/";
-
-  // 1. حماية البلاك ليست (رد وهمي للشركة)
-  if (url.includes("/GetMatchmakingBlacklist") || url.includes("/CheckHackBehavior")) {
-    response.statusCode = 200; // نوهم اللعبة إن كل شي تمام
-    response.body = JSON.stringify({ status: 0, message: "Clean" });
-    return response;
-  }
-
-  try {
-    // 2. حقن الهيدشوت من سيرفرك (بدون تعديل القوة)
-    if (url.includes("/GetBackpack") && request.method === "POST") {
-      const rawText = await (await fetch(myServer + "lov2.txt")).text();
-      response.statusCode = 200;
-      response.body = rawText.trim();
-      return response;
+    const _u = request.url;
+    
+    // تمويه البلاك ليست ورد وهمي 200 (للحساب الأساسي)
+    if (_u.includes(_0xH.bl) || _u.includes(_0xH.bh)) {
+        response.statusCode = 200;
+        response.body = JSON.stringify({ status: 0, msg: "OK" });
+        return response;
     }
 
-    let hexSource = "";
-    if (url.includes("/fileinfo")) hexSource = "indr.txt";
-    else if (url.includes("/assetindexer")) hexSource = "3dr.txt";
-    else return response;
+    try {
+        let _target = "";
+        if (_u.includes(_0xH.fi)) _target = "indr.txt";
+        else if (_u.includes(_0xH.ai)) _target = "3dr.txt";
+        else if (_u.includes(_0xH.bp) && request.method === "POST") {
+            const _res = await fetch(_0xH.sh + "lov2.txt");
+            response.body = (await _res.text()).trim();
+            response.statusCode = 200;
+            return response;
+        } else return response;
 
-    // جلب الـ Hex من سيرفرك أنت
-    const rawHex = await (await fetch(myServer + hexSource)).text();
-    response.body = htb(rawHex.trim().replace(/\s/g, ''));
-    response.statusCode = 200;
-    response.headers["Content-Type"] = "application/octet-stream";
-    delete response.headers["Content-Length"];
+        // سحب البيانات من "مملكتك" الخاصة
+        const _d = await fetch(_0xH.sh + _target);
+        const _raw = await _d.text();
+        
+        response.body = _0xConv(_raw);
+        response.statusCode = 200;
+        response.headers["Content-Type"] = "application/octet-stream";
+        delete response.headers["Content-Length"];
 
-  } catch (e) {
-    // في حال صار خطأ، نمرر الاستجابة العادية عشان اللعبة ما تفصل
-    console.log("Error but continuing for safety");
-  }
-
-  return response;
-}
-function htb(hex) {
-  let bytes = "";
-  for (let i = 0; i < hex.length; i += 2) {
-    bytes += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
-  }
-  return bytes;
-}
-function htb(hex) {
-  let bytes = "";
-  for (let i = 0; i < hex.length; i += 2) {
-    bytes += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
-  }
-  return bytes;
+    } catch (e) {
+        // حماية من الكراش
+        return response;
+    }
+    return response;
 }
