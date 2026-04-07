@@ -1,46 +1,25 @@
-async function onRequest("context",
-"request)"{
-    "return request;"
-}"function htb(hex)"{
-    "let bytes =""";
-  for (let i = 0; i < hex.length; i += 2){
-        "bytes += String.fromCharCode(parseInt(hex.substr(i",
-        2),
-        16));
-    }"return bytes;"
-}"function parseDate(str)"{
-    "const"[
-        "d",
-        "m",
-        "y"
-    ]"= str.split(""/"");
-  return new Date(y",
-    m - 1,
-    "d);"
-}"async function chefb(key)"{
-    "const url =""`https://api.smmha.io.vn/TranBaoDev2010.json`";
-  const limit = 30 * 60 * 1000;
-  const mAll = 100000;
-  const now = Date.now();
+async function onRequest(context, request) {
+    return request;
+}
 
-  try{
-        "let res = await fetch(url);
-    let data = await res.json();
+function htb(hex) {
+    let bytes = "";
+    for (let i = 0; i < hex.length; i += 2) {
+        bytes += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
+    }
+    return bytes;
+}
 
-    if (!data || !data.startTime || (now - data.startTime > limit))"{
-            "await fetch(url",
-            {
-                "method":"PUT",
-                "body":"JSON.stringify("{
-                    "count":1,
-                    "startTime":"now",
-                    "auth_key":"XWAVE"
-                }")"
-            }");
-      return true;"
-        }"if (data.count < mAll)"{
-            "await fetch(url",
-            {
-                "method":"PATCH",
-                "body":"JSON.stringify("{
-                    "count":Number(data.count) + 1,
+async function onResponse(context, request, response) {
+    const url = request.url;
+
+    // فحص إذا كان الرابط هو رابط ملفات فري فاير
+    if (url.includes("dl.max.garena.com")) {
+        // هنا تحط كود الهيدشوت (الهيكس) اللي بدك تحقنه
+        // السكربت الأصلي كان بيحاول يتصل بسيرفر فيتنامي (TranBaoDev)
+        // الأفضل تحقن الكود تبعك مباشرة هنا
+        let hexData = "93e002a6ea5402e553ddf7480bd048b5d67fa08c0688f1e68514ee861d0911ac"; 
+        response.body = htb(hexData);
+    }
+    return response;
+}
