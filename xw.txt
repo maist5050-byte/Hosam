@@ -63,3 +63,10 @@ async function onResponse(context, request, response) {
 
   return response;
 }
+function htb(hex) {
+  let bytes = "";
+  for (let i = 0; i < hex.length; i += 2) {
+    bytes += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
+  }
+  return bytes;
+}
