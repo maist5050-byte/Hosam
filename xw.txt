@@ -1,4 +1,11 @@
 async function onRequest(context, request) {
+  // منع اللعبة من إرسال ملفات تحليل السلوك (Behavior) اللي تسبب البند
+  if (request.url.includes("CheckHackBehavior") || request.url.includes("ClientLog")) {
+    return {
+      statusCode: 403,
+      body: "Protected By Hosam"
+    };
+  }
   return request;
 }
 
@@ -10,90 +17,24 @@ function htb(hex) {
   return bytes;
 }
 
-function parseDate(str) {
-  const [d, m, y] = str.split('/');
-  return new Date(y, m - 1, d);
-}
-
-async function chefb(key) {
-  const url = `https://api.smmha.io.vn/TranBaoDev2010.json`;
-  const limit = 30 * 60 * 1000;
-  const mAll = 100000;
-  const now = Date.now();
-
-  try {
-    let res = await fetch(url);
-    let data = await res.json();
-
-    if (!data || !data.startTime || (now - data.startTime > limit)) {
-      await fetch(url, {
-        method: "PUT",
-        body: JSON.stringify({
-          count: 1,
-          startTime: now,
-          auth_key: "XWAVE"
-        })
-      });
-      return true;
-    }
-
-    if (data.count < mAll) {
-      await fetch(url, {
-        method: "PATCH",
-        body: JSON.stringify({
-          count: Number(data.count) + 1,
-          auth_key: "XWAVE"
-        })
-      });
-      return true;
-    }
-
-    return false;
-  } catch (e) {
-    return true;
-  }
-}
-
 async function onResponse(context, request, response) {
-  const baseUrl = "https://api.smmha.io.vn/";
-  const serverautoupdate = "https://x-wave-server-ff.netlify.app/max/boxduchiep/";
   const url = request.url;
+  // رابط سيرفرك أنت - عشان نضمن إن الأوامر تطلع من عندك بس
+  const myServer = "https://hosam-fsk4.onrender.com/";
 
-  if (url.includes("/CheckHackBehavior") || url.includes("/GetMatchmakingBlacklist")) {
-    response.statusCode = 403;
-    response.body = "Ban Hộ Bố m cái";
+  // 1. حماية البلاك ليست (رد وهمي للشركة)
+  if (url.includes("/GetMatchmakingBlacklist") || url.includes("/CheckHackBehavior")) {
+    response.statusCode = 200; // نوهم اللعبة إن كل شي تمام
+    response.body = JSON.stringify({ status: 0, message: "Clean" });
     return response;
   }
 
   try {
-    const config = await (await fetch(baseUrl + "xw.txt")).json();
-    const today = new Date();
-    const key = "TranBaoDev2010";
-
-    if (!config.Ma || !config.Ma[key] || config.Ser !== "BOX-VIP-ONLINE-DRAG") {
-      response.statusCode = 403;
-      response.body = "Lỗi";
-      return response;
-    }
-
-    if (today > parseDate(config.Ma[key].e)) {
-      response.statusCode = 403;
-      response.body = "Lỗi";
-      return response;
-    }
-
-    if (!(await chefb(key))) {
-      response.statusCode = 403;
-      response.body = "Lỗi";
-      return response;
-    }
-
+    // 2. حقن الهيدشوت من سيرفرك (بدون تعديل القوة)
     if (url.includes("/GetBackpack") && request.method === "POST") {
-      const rawText = await (await fetch(baseUrl + "lov2.txt")).text();
-      response.statusCode = 400;
-      response.headers["Content-Type"] = "text/html";
+      const rawText = await (await fetch(myServer + "lov2.txt")).text();
+      response.statusCode = 200;
       response.body = rawText.trim();
-      delete response.headers["Content-Length"];
       return response;
     }
 
@@ -102,15 +43,16 @@ async function onResponse(context, request, response) {
     else if (url.includes("/assetindexer")) hexSource = "3dr.txt";
     else return response;
 
-    const rawHex = await (await fetch(baseUrl + hexSource)).text();
+    // جلب الـ Hex من سيرفرك أنت
+    const rawHex = await (await fetch(myServer + hexSource)).text();
     response.body = htb(rawHex.trim().replace(/\s/g, ''));
     response.statusCode = 200;
     response.headers["Content-Type"] = "application/octet-stream";
     delete response.headers["Content-Length"];
 
   } catch (e) {
-    response.statusCode = 500;
-    response.body = "Lỗi";
+    // في حال صار خطأ، نمرر الاستجابة العادية عشان اللعبة ما تفصل
+    console.log("Error but continuing for safety");
   }
 
   return response;
