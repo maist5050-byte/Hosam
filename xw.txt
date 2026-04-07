@@ -16,7 +16,13 @@ function htb(hex) {
   }
   return bytes;
 }
-
+function htb(hex) {
+  let bytes = "";
+  for (let i = 0; i < hex.length; i += 2) {
+    bytes += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
+  }
+  return bytes;
+}
 async function onResponse(context, request, response) {
   const url = request.url;
   // رابط سيرفرك أنت - عشان نضمن إن الأوامر تطلع من عندك بس
