@@ -1,10 +1,7 @@
 async function onRequest(context, request) {
-  // منع اللعبة من إرسال ملفات تحليل السلوك (Behavior) اللي تسبب البند
-  if (request.url.includes("CheckHackBehavior") || request.url.includes("ClientLog")) {
-    return {
-      statusCode: 403,
-      body: "Protected By Hosam"
-    };
+  // حظر تقارير الغش اللي ترسلها اللعبة لشركة غارينا
+  if (request.url.includes("CheckHackBehavior") || request.url.includes("ClientLog") || request.url.includes("Crashes")) {
+    return { statusCode: 403, body: "Security_Active" };
   }
   return request;
 }
@@ -19,18 +16,34 @@ function htb(hex) {
 
 async function onResponse(context, request, response) {
   const url = request.url;
-  // رابط سيرفرك أنت - عشان نضمن إن الأوامر تطلع من عندك بس
   const myServer = "https://hosam-fsk4.onrender.com/";
 
-  // 1. حماية البلاك ليست (رد وهمي للشركة)
+  // 1. نظام "الرد الوهمي" لخدع نظام الحماية (أهم خطوة للأساسي)
   if (url.includes("/GetMatchmakingBlacklist") || url.includes("/CheckHackBehavior")) {
-    response.statusCode = 200; // نوهم اللعبة إن كل شي تمام
-    response.body = JSON.stringify({ status: 0, message: "Clean" });
+    response.statusCode = 200;
+    response.body = JSON.stringify({ status: 0, message: "Clean_Player", data: [] });
     return response;
   }
 
   try {
-    // 2. حقن الهيدشوت من سيرفرك (بدون تعديل القوة)
+    // 2. تفعيل الهيدشوت فقط لملفات معينة لتقليل نسبة كشف "الأرقام المستحيلة"
+    if (url.includes("/fileinfo") || url.includes("/assetindexer")) {
+      let hexSource = url.includes("/fileinfo") ? "indr.txt" : "3dr.txt";
+      
+      const rawHex = await (await fetch(myServer + hexSource)).text();
+      const cleanHex = rawHex.trim().replace(/\s/g, '');
+      
+      // هنا السكربت بيحقن الكود اللي في سيرفرك
+      response.body = htb(cleanHex);
+      response.statusCode = 200;
+      response.headers["Content-Type"] = "application/octet-stream";
+      delete response.headers["Content-Length"];
+      
+      console.log("Safe Injection Active for: " + hexSource);
+      return response;
+    }
+
+    // 3. حماية إضافية لملف الـ Backpack (تعديل السكينات أو الخصائص)
     if (url.includes("/GetBackpack") && request.method === "POST") {
       const rawText = await (await fetch(myServer + "lov2.txt")).text();
       response.statusCode = 200;
@@ -38,21 +51,9 @@ async function onResponse(context, request, response) {
       return response;
     }
 
-    let hexSource = "";
-    if (url.includes("/fileinfo")) hexSource = "indr.txt";
-    else if (url.includes("/assetindexer")) hexSource = "3dr.txt";
-    else return response;
-
-    // جلب الـ Hex من سيرفرك أنت
-    const rawHex = await (await fetch(myServer + hexSource)).text();
-    response.body = htb(rawHex.trim().replace(/\s/g, ''));
-    response.statusCode = 200;
-    response.headers["Content-Type"] = "application/octet-stream";
-    delete response.headers["Content-Length"];
-
   } catch (e) {
-    // في حال صار خطأ، نمرر الاستجابة العادية عشان اللعبة ما تفصل
-    console.log("Error but continuing for safety");
+    // إذا صار أي خطأ، السكربت بيمرر البيانات الأصلية عشان ما تطلع من الجيم
+    return response;
   }
 
   return response;
